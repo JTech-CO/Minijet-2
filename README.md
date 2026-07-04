@@ -85,6 +85,5 @@ docs/                     # 설계 노트, 모델 가정, 단계별 리팩터링
 ## 5. 정보 (Info)
 
 - **Original Project**: [Mini-Jet-Engine-Sim](https://github.com/JTech-CO/Mini-Jet-Engine-Sim)
-- **Repository**: [JTech-CO/Minijet-2](https://github.com/JTech-CO/Minijet-2)
-- **License**: MIT
-- **Contact**: [JTech-CO](https://github.com/JTech-CO)
+- **Live Page**: [Minijet-2](<https://jtech-co.github.io/Minijet-2/>)
+- **License**: MIT 
