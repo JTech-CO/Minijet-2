@@ -8,10 +8,10 @@ import {
   standardInputs,
   stepEngine,
   toTelemetry,
-  type EngineInputs,
-  type EngineState
-} from "../engine/index.ts";
-import { createEngineAudioState, AudioLayerId } from "../audio/index.ts";
+                    
+                  
+} from "../engine/index.js";
+import { createEngineAudioState, AudioLayerId } from "../audio/index.js";
 import {
   GRAPH_CHANNELS,
   InstrumentChannelId,
@@ -19,10 +19,10 @@ import {
   appendGraphSample,
   createInstrumentSnapshot,
   createTelemetryGraphBuffer,
-  type InstrumentSnapshot,
-  type TelemetryGraphBuffer
-} from "../instruments/index.ts";
-import { createEngineCutawayState } from "../render/engineCutaway/index.ts";
+                          
+                           
+} from "../instruments/index.js";
+import { createEngineCutawayState } from "../render/engineCutaway/index.js";
 
 const spec = microTurbineSpec;
 const FIXED_DT_S = 0.02;
@@ -36,22 +36,22 @@ const GRAPH_CHANNEL_IDS = [
   InstrumentChannelId.SurgeMargin
 ];
 
-type Language = "en" | "ko";
-type ModalKind = "manual" | "theory";
+                            
+                                     
 
-interface ModalSection {
-  title: string;
-  body?: string;
-  items?: string[];
-}
+                        
+                
+                
+                   
+ 
 
-interface ModalContent {
-  kicker: string;
-  title: string;
-  sections: ModalSection[];
-}
+                        
+                 
+                
+                           
+ 
 
-const TRANSLATIONS: Record<Language, Record<string, string>> = {
+const TRANSLATIONS                                           = {
   en: {
     "top.station": "JET ENGINE OPERATIONS BENCH",
     "top.objective": "Realistic turbine operation trainer",
@@ -94,7 +94,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
   }
 };
 
-const SCENARIO_LABELS: Record<Language, Record<string, string>> = {
+const SCENARIO_LABELS                                           = {
   en: {
     "normal-start": "Normal start",
     "high-altitude": "High altitude",
@@ -115,7 +115,7 @@ const SCENARIO_LABELS: Record<Language, Record<string, string>> = {
   }
 };
 
-const MODAL_CONTENT: Record<Language, Record<ModalKind, ModalContent>> = {
+const MODAL_CONTENT                                                    = {
   en: {
     manual: {
       kicker: "OPERATIONS REFERENCE",
@@ -220,33 +220,33 @@ const MODAL_CONTENT: Record<Language, Record<ModalKind, ModalContent>> = {
   }
 };
 
-function el(id: string): HTMLElement {
+function el(id        )              {
   const element = document.getElementById(id);
   if (!element) throw new Error(`Missing #${id}`);
   return element;
 }
 
-function inputEl(id: string): HTMLInputElement {
-  return el(id) as HTMLInputElement;
+function inputEl(id        )                   {
+  return el(id)                    ;
 }
 
-function selectEl(id: string): HTMLSelectElement {
-  return el(id) as HTMLSelectElement;
+function selectEl(id        )                    {
+  return el(id)                     ;
 }
 
-const masterBtn = el("master-btn") as HTMLButtonElement;
-const resetBtn = el("reset-btn") as HTMLButtonElement;
-const trimUpBtn = el("trim-up-btn") as HTMLButtonElement;
-const trimDownBtn = el("trim-down-btn") as HTMLButtonElement;
+const masterBtn = el("master-btn")                     ;
+const resetBtn = el("reset-btn")                     ;
+const trimUpBtn = el("trim-up-btn")                     ;
+const trimDownBtn = el("trim-down-btn")                     ;
 const throttleInput = inputEl("throttle-input");
 const throttleValue = el("throttle-value");
 const throttleHandle = el("throttle-handle");
 const scenarioSelect = selectEl("scenario-select");
-const scenarioRunBtn = el("scenario-run-btn") as HTMLButtonElement;
+const scenarioRunBtn = el("scenario-run-btn")                     ;
 const gsuScreen = el("gsu-screen");
 const metricsGrid = el("metrics-grid");
-const graphCanvas = el("graph-canvas") as HTMLCanvasElement;
-const telemetryResetBtn = el("telemetry-reset-btn") as HTMLButtonElement;
+const graphCanvas = el("graph-canvas")                     ;
+const telemetryResetBtn = el("telemetry-reset-btn")                     ;
 const modePill = el("mode-pill");
 const topMode = el("top-mode");
 const statusText = el("status-text");
@@ -255,14 +255,14 @@ const annunciator = el("annunciator");
 const actionList = el("action-list");
 const audioMeters = el("audio-meters");
 const audioMaster = el("audio-master");
-const langToggle = el("lang-toggle") as HTMLButtonElement;
-const manualBtn = el("manual-btn") as HTMLButtonElement;
-const theoryBtn = el("theory-btn") as HTMLButtonElement;
+const langToggle = el("lang-toggle")                     ;
+const manualBtn = el("manual-btn")                     ;
+const theoryBtn = el("theory-btn")                     ;
 const modalBackdrop = el("modal-backdrop");
 const modalKicker = el("modal-kicker");
 const modalTitle = el("modal-title");
 const modalBody = el("modal-body");
-const modalClose = el("modal-close") as HTMLButtonElement;
+const modalClose = el("modal-close")                     ;
 
 const leds = {
   trim: el("trim-led"),
@@ -273,39 +273,39 @@ const leds = {
 };
 
 const svg = {
-  compressorRotor: el("compressor-rotor") as unknown as SVGGElement,
-  compressorBlur: el("compressor-blur") as unknown as SVGEllipseElement,
-  turbineRotor: el("turbine-rotor") as unknown as SVGGElement,
-  turbineBlur: el("turbine-blur") as unknown as SVGEllipseElement,
-  inletFlow: el("inlet-flow") as unknown as SVGPathElement,
-  inletParticles: Array.from(document.querySelectorAll<SVGCircleElement>("#inlet-particles circle")),
-  exhaustParticles: Array.from(document.querySelectorAll<SVGCircleElement>("#exhaust-particles circle")),
-  smokeParticles: Array.from(document.querySelectorAll<SVGEllipseElement>("#smoke-particles ellipse")),
-  compressorZone: el("compressor-zone") as unknown as SVGPathElement,
-  combustorZone: el("combustor-zone") as unknown as SVGPathElement,
-  turbineZone: el("turbine-zone") as unknown as SVGPathElement,
-  nozzleZone: el("nozzle-zone") as unknown as SVGPathElement,
-  flameCore: el("flame-core") as unknown as SVGEllipseElement,
-  flameTail: el("flame-tail") as unknown as SVGPathElement,
-  exhaustPlume: el("exhaust-plume") as unknown as SVGPathElement,
-  exhaustFlame: el("exhaust-flame") as unknown as SVGPathElement,
-  afterburnerCore: el("afterburner-core") as unknown as SVGEllipseElement
+  compressorRotor: el("compressor-rotor")                          ,
+  compressorBlur: el("compressor-blur")                                ,
+  turbineRotor: el("turbine-rotor")                          ,
+  turbineBlur: el("turbine-blur")                                ,
+  inletFlow: el("inlet-flow")                             ,
+  inletParticles: Array.from(document.querySelectorAll                  ("#inlet-particles circle")),
+  exhaustParticles: Array.from(document.querySelectorAll                  ("#exhaust-particles circle")),
+  smokeParticles: Array.from(document.querySelectorAll                   ("#smoke-particles ellipse")),
+  compressorZone: el("compressor-zone")                             ,
+  combustorZone: el("combustor-zone")                             ,
+  turbineZone: el("turbine-zone")                             ,
+  nozzleZone: el("nozzle-zone")                             ,
+  flameCore: el("flame-core")                                ,
+  flameTail: el("flame-tail")                             ,
+  exhaustPlume: el("exhaust-plume")                             ,
+  exhaustFlame: el("exhaust-flame")                             ,
+  afterburnerCore: el("afterburner-core")                                
 };
-let language: Language = "ko";
-let activeModal: ModalKind | null = null;
-let engineState: EngineState = createInitialEngineState(spec);
-let inputs: EngineInputs = standardInputs();
-let graphBuffer: TelemetryGraphBuffer = createTelemetryGraphBuffer(900);
+let language           = "ko";
+let activeModal                   = null;
+let engineState              = createInitialEngineState(spec);
+let inputs               = standardInputs();
+let graphBuffer                       = createTelemetryGraphBuffer(900);
 let simTimeS = 0;
 let graphElapsedS = 0;
 let accumulatorS = 0;
 let lastFrameMs = performance.now();
 
-function t(key: string): string {
+function t(key        )         {
   return TRANSLATIONS[language][key] ?? TRANSLATIONS.en[key] ?? key;
 }
 
-function scenarioLabel(id: string, fallback: string): string {
+function scenarioLabel(id        , fallback        )         {
   return SCENARIO_LABELS[language][id] ?? SCENARIO_LABELS.en[id] ?? fallback;
 }
 
@@ -322,7 +322,7 @@ function populateScenarioSelect() {
   if (selected) scenarioSelect.value = selected;
 }
 
-function renderModal(kind: ModalKind) {
+function renderModal(kind           ) {
   const content = MODAL_CONTENT[language][kind];
   modalKicker.textContent = content.kicker;
   modalTitle.textContent = content.title;
@@ -354,7 +354,7 @@ function renderModal(kind: ModalKind) {
   }
 }
 
-function openModal(kind: ModalKind) {
+function openModal(kind           ) {
   activeModal = kind;
   renderModal(kind);
   modalBackdrop.hidden = false;
@@ -374,7 +374,7 @@ function applyLanguage() {
     if (key) element.textContent = t(key);
   }
 
-  for (const element of document.querySelectorAll<HTMLElement>("[data-i18n-title]")) {
+  for (const element of document.querySelectorAll             ("[data-i18n-title]")) {
     const key = element.getAttribute("data-i18n-title");
     if (key) element.title = t(key);
   }
@@ -383,12 +383,12 @@ function applyLanguage() {
   if (activeModal) renderModal(activeModal);
 }
 
-function setLed(element: HTMLElement, on: boolean, variant: "on" | "hot" | "fault" = "on") {
+function setLed(element             , on         , variant                         = "on") {
   element.className = "led";
   if (on) element.classList.add(variant);
 }
 
-function statusClass(status: string): string {
+function statusClass(status        )         {
   if (status === InstrumentStatus.Danger) return "danger";
   if (status === InstrumentStatus.Caution) return "caution";
   return "nominal";
@@ -425,14 +425,14 @@ function initAudioMeters() {
   }
 }
 
-function setModeClass(element: HTMLElement, snapshot: InstrumentSnapshot) {
+function setModeClass(element             , snapshot                    ) {
   element.className = element === topMode ? "top-mode" : "mode-pill";
   if (snapshot.faults.length > 0) element.classList.add("fault");
   else if (snapshot.modeLabel === "RUN") element.classList.add("run");
   else if (snapshot.masterCaution) element.classList.add("warn");
 }
 
-function updateControlClasses(snapshot: InstrumentSnapshot) {
+function updateControlClasses(snapshot                    ) {
   masterBtn.classList.toggle("active", inputs.master);
   setLed(leds.trim, inputs.trimRun);
   setLed(leds.pwr, inputs.master);
@@ -446,29 +446,29 @@ function updateControlClasses(snapshot: InstrumentSnapshot) {
   setModeClass(topMode, snapshot);
 }
 
-function updateGsu(snapshot: InstrumentSnapshot) {
+function updateGsu(snapshot                    ) {
   gsuScreen.innerHTML = snapshot.gsuRows
     .map((row) => `<div class="gsu-row ${statusClass(row.status)}"><span>${row.label}</span><span>${row.value}</span></div>`)
     .join("");
 }
 
-function updateMetrics(snapshot: InstrumentSnapshot) {
-  for (const metric of metricsGrid.querySelectorAll<HTMLElement>(".metric")) {
-    const id = metric.dataset.metric as InstrumentChannelId;
+function updateMetrics(snapshot                    ) {
+  for (const metric of metricsGrid.querySelectorAll             (".metric")) {
+    const id = metric.dataset.metric                       ;
     const value = snapshot.values[id];
     if (!value) continue;
 
     metric.className = `metric ${statusClass(value.status)}`;
     const label = metric.querySelector("label");
     const strong = metric.querySelector("strong");
-    const bar = metric.querySelector<HTMLElement>(".bar");
+    const bar = metric.querySelector             (".bar");
     if (label) label.textContent = value.label;
     if (strong) strong.textContent = value.formatted;
     if (bar) bar.style.width = `${Math.min(value.normalized, 1) * 100}%`;
   }
 }
 
-function updateRecovery(snapshot: InstrumentSnapshot) {
+function updateRecovery(snapshot                    ) {
   const guidance = getActiveRecoveryGuidance(toTelemetry(engineState, spec));
 
   annunciator.className = "annunciator";
@@ -487,7 +487,7 @@ function updateRecovery(snapshot: InstrumentSnapshot) {
     .join("");
 }
 
-function updateCutaway(snapshot: InstrumentSnapshot) {
+function updateCutaway(snapshot                    ) {
   const telemetry = toTelemetry(engineState, spec);
   const cutaway = createEngineCutawayState(telemetry, spec);
   const zoneById = Object.fromEntries(cutaway.zones.map((zone) => [zone.id, zone]));
@@ -591,17 +591,17 @@ function updateAudio() {
   const audio = createEngineAudioState(toTelemetry(engineState, spec), spec);
   audioMaster.textContent = audio.masterGain.toFixed(1);
 
-  for (const row of audioMeters.querySelectorAll<HTMLElement>(".audio-meter")) {
-    const id = row.dataset.layer as AudioLayerId;
+  for (const row of audioMeters.querySelectorAll             (".audio-meter")) {
+    const id = row.dataset.layer                ;
     const layer = audio.layers[id];
-    const fill = row.querySelector<HTMLElement>(".fill");
+    const fill = row.querySelector             (".fill");
     const value = row.querySelector("strong");
     if (fill) fill.style.width = `${layer.gain * 100}%`;
     if (value) value.textContent = layer.gain.toFixed(2);
   }
 }
 
-function resizeCanvas(canvas: HTMLCanvasElement) {
+function resizeCanvas(canvas                   ) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   const width = Math.max(1, Math.floor(rect.width * dpr));
@@ -758,7 +758,7 @@ function render() {
   drawGraph();
 }
 
-function isTelemetryActive(): boolean {
+function isTelemetryActive()          {
   return (
     engineState.spoolRpm > 300 ||
     engineState.ecu.starterDuty > 0 ||
@@ -781,15 +781,15 @@ function recordGraphSample() {
   graphBuffer = appendGraphSample(graphBuffer, snapshot.graphSample);
 }
 
-function setInputsFromScenarioLastStep(presetId: string) {
-  const preset = getScenarioPreset(presetId as never);
+function setInputsFromScenarioLastStep(presetId        ) {
+  const preset = getScenarioPreset(presetId         );
   const lastStep = preset.steps[preset.steps.length - 1];
   inputs = { ...lastStep.inputs, ambient: { ...lastStep.inputs.ambient } };
   throttleInput.value = String(Math.round(inputs.throttle * 100));
 }
 
 function resetSimulation() {
-  const preset = getScenarioPreset(scenarioSelect.value as never);
+  const preset = getScenarioPreset(scenarioSelect.value         );
   inputs = standardInputs({ ambient: preset.ambient });
   engineState = createInitialEngineState(spec, preset.ambient.temperatureC);
   graphBuffer = createTelemetryGraphBuffer(900);
@@ -801,7 +801,7 @@ function resetSimulation() {
 }
 
 function runSelectedScenario() {
-  const preset = getScenarioPreset(scenarioSelect.value as never);
+  const preset = getScenarioPreset(scenarioSelect.value         );
   engineState = runScenarioPreset(preset, spec);
   setInputsFromScenarioLastStep(preset.id);
   const active = isTelemetryActive();
@@ -831,7 +831,7 @@ function applyStartupParameters() {
     resetSimulation();
   }
 }
-function stepSimulation(dtS: number) {
+function stepSimulation(dtS        ) {
   accumulatorS += Math.min(dtS, 0.12);
 
   while (accumulatorS >= FIXED_DT_S) {
@@ -855,7 +855,7 @@ function stepSimulation(dtS: number) {
   }
 }
 
-function frame(nowMs: number) {
+function frame(nowMs        ) {
   const dtS = (nowMs - lastFrameMs) / 1000;
   lastFrameMs = nowMs;
   stepSimulation(dtS);

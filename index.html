@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>minijet-2</title>
+  <link rel="stylesheet" href="./public/styles.css">
+</head>
+<body>
+  <main class="sim-shell">
+    <header class="topbar panel">
+      <div class="brand-block">
+        <span data-i18n="top.station">JET ENGINE OPERATIONS BENCH</span>
+        <strong>minijet-2</strong>
+      </div>
+      <div class="topbar-status">
+        <span data-i18n="top.objective">Realistic turbine operation trainer</span>
+        <span id="top-mode" class="top-mode">OFF</span>
+      </div>
+      <nav class="top-actions" aria-label="Interface actions">
+        <button id="manual-btn" class="toolbar-btn" type="button" data-modal="manual" data-i18n="top.manual">Manual</button>
+        <button id="theory-btn" class="toolbar-btn" type="button" data-modal="theory" data-i18n="top.theory">How it works</button>
+        <button id="lang-toggle" class="toolbar-btn lang" type="button">KR</button>
+      </nav>
+    </header>
+
+    <section class="controller panel" aria-label="Controller">
+      <div class="panel-header">
+        <span data-i18n="panel.controller">CONTROLLER</span>
+        <span id="mode-pill" class="mode-pill">OFF</span>
+      </div>
+      <div class="power-row">
+        <button id="master-btn" class="cmd danger" type="button">MASTER</button>
+        <button id="reset-btn" class="icon-cmd" type="button" title="Reset" data-i18n-title="control.resetTitle">RST</button>
+      </div>
+      <div class="throttle-module" aria-label="Throttle quadrant">
+        <div class="throttle-scale" aria-hidden="true">
+          <span>100</span>
+          <span>75</span>
+          <span>50</span>
+          <span>25</span>
+          <span>IDLE</span>
+        </div>
+        <div class="throttle-wrap">
+          <input id="throttle-input" class="throttle" type="range" min="0" max="100" value="0" aria-label="Throttle">
+          <div class="throttle-slot"></div>
+          <div id="throttle-handle" class="throttle-handle" aria-hidden="true"></div>
+        </div>
+        <div class="throttle-readout"><span id="throttle-value">0</span><small>%</small></div>
+      </div>
+      <div class="trim-grid">
+        <button id="trim-up-btn" class="cmd" type="button">TRIM UP</button>
+        <div id="trim-led" class="led"></div>
+        <button id="trim-down-btn" class="cmd" type="button">TRIM DN</button>
+      </div>
+      <label class="field-label" for="scenario-select" data-i18n="control.scenario">SCENARIO</label>
+      <div class="scenario-row">
+        <select id="scenario-select"></select>
+        <button id="scenario-run-btn" class="cmd" type="button">RUN</button>
+      </div>
+    </section>
+
+    <section class="engine-stage panel" aria-label="Engine cutaway">
+      <div class="stage-topline">
+        <div>
+          <div class="eyebrow" data-i18n="panel.engineEyebrow">SIMULATION BENCH</div>
+          <h1>MJ-140 MICRO TURBINE</h1>
+        </div>
+        <div id="status-text" class="status-text">OFF</div>
+      </div>
+      <div class="engine-viewport">
+        <svg id="cutaway-svg" class="cutaway" viewBox="0 0 960 360" role="img" aria-label="Engine cutaway visualization">
+          <defs>
+            <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#737a77"/>
+              <stop offset="0.24" stop-color="#d9ddd8"/>
+              <stop offset="0.54" stop-color="#8a918d"/>
+              <stop offset="1" stop-color="#232826"/>
+            </linearGradient>
+            <linearGradient id="inner-metal" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#56635f"/>
+              <stop offset="0.35" stop-color="#aeb6af"/>
+              <stop offset="0.72" stop-color="#6b7067"/>
+              <stop offset="1" stop-color="#252a27"/>
+            </linearGradient>
+            <linearGradient id="compressed-air" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#79dce6" stop-opacity="0.2"/>
+              <stop offset="1" stop-color="#d7f9ff" stop-opacity="0.5"/>
+            </linearGradient>
+            <linearGradient id="combustion-heat" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#ff5c2f"/>
+              <stop offset="0.48" stop-color="#ffd56a"/>
+              <stop offset="1" stop-color="#fff8db"/>
+            </linearGradient>
+            <linearGradient id="turbine-heat" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#ffd67c" stop-opacity="0.58"/>
+              <stop offset="1" stop-color="#ec563c" stop-opacity="0.28"/>
+            </linearGradient>
+            <linearGradient id="plasma-flame" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#f8ffff"/>
+              <stop offset="0.28" stop-color="#74eaff"/>
+              <stop offset="0.62" stop-color="#ffb347"/>
+              <stop offset="1" stop-color="#ff4d24" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="rotor-hub" cx="45%" cy="34%" r="70%">
+              <stop offset="0" stop-color="#f5f7ef"/>
+              <stop offset="0.38" stop-color="#979d96"/>
+              <stop offset="1" stop-color="#151815"/>
+            </radialGradient>
+            <radialGradient id="smoke" cx="42%" cy="46%" r="70%">
+              <stop offset="0" stop-color="#d2d8d3" stop-opacity="0.35"/>
+              <stop offset="1" stop-color="#555d58" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="soft-glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="heat-haze"><feTurbulence type="fractalNoise" baseFrequency="0.02 0.18" numOctaves="2" seed="6"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter>
+            <filter id="smoke-blur"><feGaussianBlur stdDeviation="6"/></filter>
+            <clipPath id="engine-core-clip">
+              <path d="M96 174 C138 106 231 88 366 100 L646 100 C760 100 846 128 900 178 C846 228 760 256 646 256 L366 256 C231 270 138 238 96 174Z"/>
+            </clipPath>
+          </defs>
+
+          <g id="inlet-particles" class="inlet-particles">
+            <circle/><circle/><circle/><circle/><circle/><circle/><circle/><circle/>
+            <circle/><circle/><circle/><circle/><circle/><circle/><circle/><circle/>
+            <circle/><circle/><circle/><circle/><circle/><circle/><circle/><circle/>
+          </g>
+          <path id="inlet-flow" class="intake-centerline" d="M28 178 L222 178"/>
+
+          <g id="exhaust-visuals" class="exhaust-visuals">
+            <g id="smoke-particles" class="smoke-particles">
+              <ellipse/><ellipse/><ellipse/><ellipse/><ellipse/><ellipse/><ellipse/><ellipse/>
+            </g>
+            <path id="exhaust-plume" class="exhaust-plume" d="M830 178 C880 140 936 142 960 178 C936 214 880 216 830 178Z"/>
+            <path id="exhaust-flame" class="exhaust-flame" d="M805 178 C860 132 930 144 960 178 C930 212 860 224 805 178Z"/>
+            <ellipse id="afterburner-core" class="afterburner-core" cx="905" cy="178" rx="1" ry="1"/>
+            <g id="exhaust-particles" class="exhaust-particles">
+              <circle/><circle/><circle/><circle/><circle/><circle/><circle/><circle/>
+              <circle/><circle/><circle/><circle/><circle/><circle/><circle/><circle/>
+            </g>
+          </g>
+
+          <path class="engine-shadow" d="M90 172 C132 100 226 82 365 96 L650 96 C766 96 850 124 900 178 C846 234 760 260 645 260 L360 260 C220 274 129 248 90 172Z"/>
+          <path class="engine-case outer-case" d="M92 170 C136 102 228 86 365 100 L652 100 C760 100 846 128 900 178 C846 228 760 256 652 256 L365 256 C228 270 136 238 92 170Z"/>
+
+          <g class="engine-internals" clip-path="url(#engine-core-clip)">
+            <path id="compressor-zone" class="zone-fill compressor" d="M206 119 L382 101 L382 253 L206 235 Z"/>
+            <path id="combustor-zone" class="zone-fill combustor" d="M382 102 L596 102 L596 254 L382 254 Z"/>
+            <path id="turbine-zone" class="zone-fill turbine" d="M596 104 L710 118 L710 240 L596 254 Z"/>
+            <path id="nozzle-zone" class="zone-fill nozzle" d="M710 118 C785 128 858 150 900 178 C858 206 785 230 710 240 Z"/>
+
+            <path class="flow-tube upper" d="M94 165 C178 114 262 112 382 128 L590 128 C704 128 815 142 900 178"/>
+            <path class="flow-tube lower" d="M94 183 C178 236 262 238 382 220 L590 220 C704 222 815 214 900 178"/>
+            <path class="shaft" d="M116 178 L822 178"/>
+            <path class="center-bearing" d="M250 167 L710 167 L710 189 L250 189Z"/>
+
+            <g class="compressor-stators">
+              <path d="M218 126 L248 178 L218 230"/>
+              <path d="M254 120 L287 178 L254 236"/>
+              <path d="M294 116 L326 178 L294 240"/>
+              <path d="M336 112 L366 178 L336 244"/>
+            </g>
+            <g id="compressor-rotor" class="rotor compressor-rotor" transform="translate(315 178)">
+              <circle class="rotor-disc" r="58"/>
+              <circle class="rotor-hub" r="17"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(45)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(90)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(135)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(180)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(225)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(270)"/>
+              <path class="rotor-blade" d="M-8 -16 C8 -58 30 -66 48 -42 C28 -30 18 -10 12 4Z" transform="rotate(315)"/>
+            </g>
+            <ellipse id="compressor-blur" class="rotor-blur" cx="315" cy="178" rx="66" ry="66"/>
+
+            <g class="combustor-liner">
+              <path d="M394 130 C454 112 536 112 586 130 L586 226 C532 244 452 244 394 226Z"/>
+              <circle cx="424" cy="148" r="3"/><circle cx="452" cy="140" r="3"/><circle cx="482" cy="136" r="3"/><circle cx="514" cy="138" r="3"/><circle cx="546" cy="146" r="3"/>
+              <circle cx="424" cy="208" r="3"/><circle cx="452" cy="216" r="3"/><circle cx="482" cy="220" r="3"/><circle cx="514" cy="218" r="3"/><circle cx="546" cy="210" r="3"/>
+            </g>
+            <g class="fuel-nozzles">
+              <path d="M386 144 L414 160"/><path d="M386 178 L420 178"/><path d="M386 212 L414 196"/>
+            </g>
+            <ellipse id="flame-core" class="flame-core" cx="492" cy="178" rx="1" ry="1"/>
+            <path id="flame-tail" class="flame-tail" d="M418 178 C470 138 562 146 622 178 C562 210 470 218 418 178Z"/>
+
+            <g class="turbine-stators">
+              <path d="M606 122 L632 178 L606 234"/>
+              <path d="M632 126 L656 178 L632 230"/>
+              <path d="M682 130 L704 178 L682 226"/>
+            </g>
+            <g id="turbine-rotor" class="rotor turbine-rotor" transform="translate(662 178)">
+              <circle class="rotor-disc" r="46"/>
+              <circle class="rotor-hub" r="14"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(45)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(90)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(135)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(180)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(225)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(270)"/>
+              <path class="turbine-blade" d="M-7 -12 C8 -48 33 -54 42 -30 C22 -24 16 -8 10 5Z" transform="rotate(315)"/>
+            </g>
+            <ellipse id="turbine-blur" class="rotor-blur turbine-blur" cx="662" cy="178" rx="54" ry="54"/>
+
+            <g class="nozzle-vanes">
+              <path d="M722 128 C770 146 820 160 892 178"/>
+              <path d="M722 228 C770 210 820 196 892 178"/>
+              <path d="M718 178 L900 178"/>
+            </g>
+          </g>
+
+          <path class="cutaway-rim" d="M92 170 C136 102 228 86 365 100 L652 100 C760 100 846 128 900 178 C846 228 760 256 652 256 L365 256 C228 270 136 238 92 170Z"/>
+          <path class="case-highlight" d="M124 158 C176 112 254 104 370 114 L646 114 C736 114 820 136 868 170"/>
+          <g class="zone-labels">
+            <text x="154" y="304" data-i18n="zone.inlet">INLET</text>
+            <text x="292" y="304" data-i18n="zone.comp">COMP</text>
+            <text x="492" y="304" data-i18n="zone.burner">BURNER</text>
+            <text x="650" y="304" data-i18n="zone.turb">TURB</text>
+            <text x="802" y="304" data-i18n="zone.nozzle">NOZZLE</text>
+          </g>
+        </svg>
+      </div>
+      <div class="overlay-grid">
+        <div><span>AIR</span><strong id="air-overlay">0.00</strong></div>
+        <div><span>PR</span><strong id="pr-overlay">1.00</strong></div>
+        <div><span>SURGE</span><strong id="surge-overlay">0.00</strong></div>
+        <div><span>THRUST</span><strong id="thrust-overlay">0.0N</strong></div>
+      </div>
+    </section>
+
+    <section class="gsu panel" aria-label="GSU terminal">
+      <div class="panel-header"><span data-i18n="panel.gsu">GSU TERMINAL</span><span>V2</span></div>
+      <div id="gsu-screen" class="gsu-screen"></div>
+      <div id="annunciator" class="annunciator">NOMINAL</div>
+      <div id="action-list" class="action-list"></div>
+    </section>
+
+    <section class="ecu panel" aria-label="ECU">
+      <div class="panel-header"><span>JET ECU</span><span data-i18n="panel.control">CONTROL</span></div>
+      <div class="led-row">
+        <div><span id="pwr-led" class="led"></span><label>PWR</label></div>
+        <div><span id="glow-led" class="led"></span><label>GLOW</label></div>
+        <div><span id="start-led" class="led"></span><label>START</label></div>
+        <div><span id="fuel-led" class="led"></span><label>FUEL</label></div>
+      </div>
+      <div id="metrics-grid" class="metrics-grid"></div>
+    </section>
+
+    <section class="graph-panel panel" aria-label="Telemetry graph">
+      <div class="panel-header"><span data-i18n="panel.telemetry">TELEMETRY</span><div class="telemetry-tools"><button id="telemetry-reset-btn" class="panel-mini-btn" type="button" title="Reset telemetry">RST</button><span id="sim-time">0.0s</span></div></div>
+      <canvas id="graph-canvas"></canvas>
+    </section>
+
+    <section class="audio-panel panel" aria-label="Audio model">
+      <div class="panel-header"><span data-i18n="panel.audio">AUDIO MODEL</span><span id="audio-master">0</span></div>
+      <div id="audio-meters" class="audio-meters"></div>
+    </section>
+  </main>
+
+  <div id="modal-backdrop" class="modal-backdrop" hidden>
+    <article class="info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <div>
+          <span id="modal-kicker" class="modal-kicker">REFERENCE</span>
+          <h2 id="modal-title">Manual</h2>
+        </div>
+        <button id="modal-close" class="icon-cmd modal-close" type="button" title="Close">X</button>
+      </header>
+      <div id="modal-body" class="modal-body"></div>
+    </article>
+  </div>
+
+  <script type="module" src="./public/src/app/main.js"></script>
+</body>
+</html>
+
+
+
+
+
+

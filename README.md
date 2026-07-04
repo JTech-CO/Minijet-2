@@ -1,4 +1,4 @@
-﻿# Minijet-2
+# Minijet-2
 
 > **A realistic miniature jet engine simulation and operations bench, upgraded from the original Mini Jet Engine Sim.**
 
@@ -6,6 +6,8 @@
 
 Minijet-2는 소형 제트엔진의 시동, 연소, 압축, 터빈 구동, 배기, ECU 보호 로직을 더 현실적인 운용 경험으로 재구성한 웹 기반 시뮬레이터입니다.
 이 프로젝트는 기존 프로젝트인 [Mini-Jet-Engine-Sim](https://github.com/JTech-CO/Mini-Jet-Engine-Sim)을 바탕으로 업그레이드되었으며, 단순한 시각 데모를 넘어 실제 터빈 운용 절차와 계기 판독 흐름을 구현하는 것을 목표로 합니다.
+
+![Minijet-2 running engine simulation](images/minijet-2-running.png)
 
 **주요 기능**
 - **실시간 제트엔진 코어 시뮬레이션**: 흡기, 압축기, 연소실, 터빈, 노즐, 연료 펌프, 배터리, 열 지연, 스풀 관성을 TypeScript 모델로 계산합니다.

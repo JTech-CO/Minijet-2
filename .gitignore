@@ -1,9 +1,8 @@
-﻿node_modules/
+node_modules/
 .env
 .env.*
 *.log
 
-public/src/
 public/build-info.json
 
 original/
