@@ -1,0 +1,15 @@
+﻿{
+  "name": "minijet-2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A typed miniature jet engine simulation core.",
+  "scripts": {
+    "build": "node scripts/build-browser.mjs",
+    "serve": "node scripts/serve-static.mjs",
+    "test": "node --test tests/engineCore.test.ts tests/instruments.test.ts tests/phase5.test.ts tests/qa.test.ts"
+  },
+  "engines": {
+    "node": ">=25"
+  }
+}

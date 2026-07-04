@@ -1,0 +1,12 @@
+﻿node_modules/
+.env
+.env.*
+*.log
+
+public/src/
+public/build-info.json
+
+original/
+.agents/
+.codex/
+.DS_Store
